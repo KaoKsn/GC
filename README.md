@@ -3,27 +3,32 @@
 ## Project Structure
 <pre>
     .
+    ├── LICENSE
     ├── Mark_N_Sweep
+    │   ├── include
+    │   │   ├── objects.h
+    │   │   ├── stack.h
+    │   │   └── vm.h
     │   ├── makefile
-    │   ├── objects.c
-    │   ├── objects.h
-    │   ├── README.md
-    │   ├── stack.c
-    │   ├── stack.h
-    │   ├── vm.c
-    │   └── vm.h
+    │   └── src
+    │       ├── main.c
+    │       ├── objects.c
+    │       ├── stack.c
+    │       └── vm.c
     ├── README.md
     └── Refcount
-        ├── main.c
+        ├── caveats
         ├── objects.c
         ├── objects.h
         ├── stack.c
-        ├── stack.h
-        └── vulnerabilities
+        └── stack.h
+
+5 directories, 15 files
 </pre>
 
 ## Compiling the Running.
 ```bash
-    ./makefile main
+    make
     ./main
+    make clean
 ```
