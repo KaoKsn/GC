@@ -1,0 +1,53 @@
+Can't handle self referencing arrays. Both printing and freeing.
+
+int main(){
+    object_t *objects[7] = {
+        get_int(3),
+        get_float(5.5),
+        get_string("thisstring"),
+        get_char('c'),
+        get_bool(true),
+        get_array(3),
+        get_string("second")
+    };
+
+    // ***** Failure Point ******
+    set_array(objects[5], 4, objects[1]);
+    // Causes free of objects[1] since the dec_refcount is called. def_counter accounts for NULL
+    for (int i = 0; i < 7; i++) {
+        if ( i != 1)
+            dec_refcount(objects[i]);
+    }
+    return 0;
+}
+
+
+
+Calling set_array() at boundary all the time.
+A potential fix - Allow only fixed size arrays.
+
+set_array() does dec_refcount(src) on failure.
+Can be catastrophic if 
+    1. It's an object being used as a normal variable and not just a passing parameter.
+    and has a refcount of 1. -- Freed prematurely.
+set_array(array_obj, index, get_int(3)) -- OK on failure.
+set_array(array_obj, index, some_other_obj) -- DANGEROUS on failure.
+
+-- Doesn't validate inputs in most cases!
+
+
+
+
+-- Fixed.
+obj = NULL after free doesn't work since obj is in the local stack frame that just points to the memory in heap.
+pass a object_t ** to both set_array and dec_refcount so that 
+they can directly assign NULL to the object* itself and not a copy of it in the stack frame.
+This also required free_obj to return NULL on failure or completion.
+
+-- Fix: Pass the pointer to the object pointer, to any function that tries to dec_refcount so that you can manipulate the original object_t* and set it to NULL on 0.
+
+In a normal case.
+Dec_refcount called(**obj) -> *obj passed to free_obj() if refcount = 0 -> returns NULL -> assigned to object*. 
+
+Still the problem of freeing the object exists.But now you can't pass an object argument that was just created for passing
+Ex: set_array(array, index, &(get_int(3))); -- lvalue required.
